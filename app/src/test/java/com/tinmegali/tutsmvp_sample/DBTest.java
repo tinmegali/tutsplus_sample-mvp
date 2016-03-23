@@ -47,10 +47,10 @@ public class DBTest {
     @Test
     public void insertNote() {
         String noteText = "noteText";
-        long id = dao.insertNote(getNote(noteText));
-        assertTrue(id > 0);
+        Note noteInserted = dao.insertNote(getNote(noteText));
+        assertNotNull(noteInserted);
 
-        Note note = dao.getNote((int)id);
+        Note note = dao.getNote(noteInserted.getId());
         assertNotNull(note);
         assertEquals(note.getText(), noteText);
     }
@@ -75,12 +75,12 @@ public class DBTest {
     @Test
     public void deleteNote() {
         Note note = getNote("deleteNote");
-        long id = dao.insertNote(note);
-        assertTrue(id > 0);
-
-        Note noteInserted = dao.getNote((int)id);
+        Note noteInserted = dao.insertNote(note);
         assertNotNull(noteInserted);
-        assertEquals(noteInserted.getText(), note.getText());
+
+        Note noteFetched = dao.getNote(noteInserted.getId());
+        assertNotNull(noteFetched);
+        assertEquals(noteFetched.getText(), note.getText());
 
         long delResult = dao.deleteNote( noteInserted );
         assertEquals(1, delResult);

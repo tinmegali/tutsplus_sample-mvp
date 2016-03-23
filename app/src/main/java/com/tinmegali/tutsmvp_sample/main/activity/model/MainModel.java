@@ -99,9 +99,11 @@ public class MainModel implements MVP_Main.ProvidedModelOps {
     @Override
     public boolean deleteNote(Note note, int adapterPos) {
         long res = mDAO.deleteNote(note);
-        if ( res > 0 )
+        if ( res > 0 ) {
             mNotes.remove(adapterPos);
-        return res > 0;
+            return true;
+        }
+        return false;
     }
 
     /**

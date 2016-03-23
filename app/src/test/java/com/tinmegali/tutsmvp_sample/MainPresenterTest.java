@@ -1,7 +1,5 @@
 package com.tinmegali.tutsmvp_sample;
 
-import android.content.Context;
-import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -14,11 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -45,8 +41,6 @@ public class MainPresenterTest {
         mPresenter = new MainPresenter( mockView );
         mPresenter.setModel(mockModel);
 
-        PowerMockito.mockStatic(AlertDialog.Builder.class);
-
         when(mockModel.loadData()).thenReturn(true);
         reset(mockView);
     }
@@ -55,20 +49,22 @@ public class MainPresenterTest {
     public void testClickNewNote() {
         EditText mockEditText = Mockito.mock(EditText.class, RETURNS_DEEP_STUBS);
         when(mockEditText.getText().toString()).thenReturn("Test_true");
-        when(mockModel.insertNote(any(Note.class))).thenReturn(true);
+        int arrayPos = 10;
+        when(mockModel.insertNote(any(Note.class))).thenReturn(arrayPos);
 
         mPresenter.clickNewNote(mockEditText);
         verify(mockModel).insertNote(any(Note.class));
-        verify(mockView).notifyDataSetChanged();
+        verify(mockView).notifyItemInserted( eq(arrayPos+1) );
+        verify(mockView).notifyItemRangeChanged(eq(arrayPos), anyInt());
         verify(mockView, never()).showToast(any(Toast.class));
     }
 
     @Test
     public void testClickNewNoteError() {
         EditText mockEditText = Mockito.mock(EditText.class, RETURNS_DEEP_STUBS);
-        when(mockModel.insertNote(any(Note.class))).thenReturn(false);
+        when(mockModel.insertNote(any(Note.class))).thenReturn(-1);
         when(mockEditText.getText().toString()).thenReturn("Test_false");
-        when(mockModel.insertNote(any(Note.class))).thenReturn(false);
+        when(mockModel.insertNote(any(Note.class))).thenReturn(-1);
         mPresenter.clickNewNote(mockEditText);
         verify(mockView).showToast(any(Toast.class));
     }

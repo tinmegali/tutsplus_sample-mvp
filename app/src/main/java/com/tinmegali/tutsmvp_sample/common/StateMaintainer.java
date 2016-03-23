@@ -19,26 +19,17 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 /**
- * todo english comments
- * <p>Retains and maintain object's state between configuration changes
+ * Retains and maintain object's state between configuration changes
  * in Activitys and Fragments.
- * </p>
- * <p>
- * <strong>IMPORTANT: View Object should implement <code> RequiredViewOps </code></strong>
- * </p>
- * <p>
+ *
  * Created by Tin Megali on 24/02/16. <br>
  * Project: AndroidMVP <br>
  *
  * <a href="http://www.tinmegali.com">www.tinmegali.com</a>
- * </p>
- * --------------------------------------------------- <br>
- * <p>
  * Based on <a href="https://github.com/douglascraigschmidt/POSA-15/tree/master/ex/AcronymExpander/src/vandy/mooc">
  *     framework MVP</a> developed by
  * <a href="https://github.com/douglascraigschmidt">
  *     Dr. Douglas Schmidth</a>
- * </p>
  *
  * @see <a href="https://github.com/tinmegali/simple-mvp">Project's Git</a> <br>
  * @see <a href="https://github.com/tinmegali/simple-mvp/tree/master/AndroidMVP/app">Sample Application</a>
@@ -56,10 +47,7 @@ public class StateMaintainer {
     private boolean mIsRecreating;
 
     /**
-     * Construtor
-     * @param fragmentManager       repassa uma referência do FragmentManager
-     * @param stateMaintainerTAG      a TAG utilizada para inserir o fragmento responsável
-     *                              por manter os objetos "vivos"
+     * Constructor
      */
     public StateMaintainer(FragmentManager fragmentManager, String stateMaintainerTAG) {
         mFragmentManager = new WeakReference<>(fragmentManager);
@@ -67,9 +55,8 @@ public class StateMaintainer {
     }
 
     /**
-     * cria o fragmento responsável por armazenar o objetos
-     * @return  true: criou o framentos e rodou pela primeira vez
-     *          false: o objeto já foi criado, portanto é apenas recuperado
+     * Creates the Fragment responsible to maintain the objects.
+     * @return  true: fragment just created
      */
     public boolean firstTimeIn() {
         try {
@@ -104,20 +91,17 @@ public class StateMaintainer {
 
 
     /**
-     * Insere objeto a serem presenrvados durante mudanças de configuração
-     * @param key   TAG de referência para recuperação do objeto
-     * @param obj   Objeto a ser mantido
+     * Insert the object to be preserved.
+     * @param key   object's TAG
+     * @param obj   object to maintain
      */
     public void put(String key, Object obj) {
         mStateMaintainerFrag.put(key, obj);
     }
 
     /**
-     * Insere objeto a serem presenrvados durante mudanças de configuração.
-     * Utiliza a classe do Objeto como referência futura.
-     * Só deve ser utilizado somente uma vez por classe, caso contrário haverá
-     * possíveis conflitos na recuperação dos dados
-     * @param obj   Objeto a ser mantido
+     * Insert the object to be preserved.
+     * @param obj   object to maintain
      */
     public void put(Object obj) {
         put(obj.getClass().getName(), obj);
@@ -125,10 +109,10 @@ public class StateMaintainer {
 
 
     /**
-     * Recupera o objeto salvo
-     * @param key   Chave de referência do obj
-     * @param <T>   tipo genérico de retorno
-     * @return      Objeto armazenado
+     * Recovers the object saved
+     * @param key   Object's TAG
+     * @param <T>   Object type
+     * @return      Object saved
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String key)  {
@@ -137,10 +121,9 @@ public class StateMaintainer {
     }
 
     /**
-     * Verifica a existência de um objeto com a chave fornecida
-     * @param key   Chave para verificação
-     * @return      true: obj existe
-     *              false: obj insexistente
+     * Checks the existence of a given object
+     * @param key   Key to verification
+     * @return      true: Object exists
      */
     public boolean hasKey(String key) {
         return mStateMaintainerFrag.get(key) != null;
@@ -148,11 +131,8 @@ public class StateMaintainer {
 
 
     /**
-     * Armazena e administra os objetos que devem ser preservados
-     * durante mudanças de configuração.
-     * É instanciado somente uma vez e utiliza um
-     * <code>HashMap</code> para salvar os objetos e suas
-     * chaves de referência.
+     * Fragment resposible to preserve objects.
+     * Instantiated only once. Uses a hashmap to save objs
      */
     public static class StateMngFragment extends Fragment {
         private HashMap<String, Object> mData = new HashMap<>();
@@ -160,33 +140,32 @@ public class StateMaintainer {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            // Garante que o Fragmento será preservado
-            // durante mudanças de configuração
+            // Grants that the fragment will be preserved
             setRetainInstance(true);
         }
 
         /**
-         * Insere objetos no hashmap
-         * @param key   Chave de referência
-         * @param obj   Objeto a ser salvo
+         * Insert objects on the hashmap
+         * @param key   Reference key
+         * @param obj   Object to be saved
          */
         public void put(String key, Object obj) {
             mData.put(key, obj);
         }
 
         /**
-         * Insere objeto utilizando o nome da classe como referência
-         * @param object    Objeto a ser salvo
+         * Insert objects on the hashmap
+         * @param object    Object to be saved
          */
         public void put(Object object) {
             put(object.getClass().getName(), object);
         }
 
         /**
-         * Recupera objeto salvo no hashmap
-         * @param key   Chave de referência
-         * @param <T>   Classe
-         * @return      Objeto salvo
+         * Recovers saved object
+         * @param key   Reference key
+         * @param <T>   Object type
+         * @return      Object saved
          */
         @SuppressWarnings("unchecked")
         public <T> T get(String key) {
