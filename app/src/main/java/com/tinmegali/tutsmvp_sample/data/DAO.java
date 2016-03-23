@@ -8,6 +8,8 @@ import com.tinmegali.tutsmvp_sample.models.Note;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * ---------------------------------------------------
  * Created by Tin Megali on 18/03/16.
@@ -20,7 +22,7 @@ import java.util.ArrayList;
 public class DAO {
 
     private DBSchema mHelper;
-    private Context mContext;
+    public Context mContext;
 
     //SELECTIONS
     private static final String     SELECT_ID_BASED = DBSchema.TB_NOTES.ID + " = ? ";
@@ -31,6 +33,7 @@ public class DAO {
         this.mContext = context;
         mHelper = new DBSchema(mContext);
     }
+
 
     private SQLiteDatabase getReadDB(){
         return mHelper.getReadableDatabase();

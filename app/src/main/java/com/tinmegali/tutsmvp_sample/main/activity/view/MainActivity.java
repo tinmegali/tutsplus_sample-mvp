@@ -9,6 +9,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,22 +19,28 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.tinmegali.tutsmvp_sample.R;
+import com.tinmegali.tutsmvp_sample.SampleApp;
 import com.tinmegali.tutsmvp_sample.common.StateMaintainer;
+import com.tinmegali.tutsmvp_sample.di.module.MainActivityModule;
 import com.tinmegali.tutsmvp_sample.main.activity.MVP_Main;
 import com.tinmegali.tutsmvp_sample.main.activity.model.MainModel;
 import com.tinmegali.tutsmvp_sample.main.activity.presenter.MainPresenter;
 import com.tinmegali.tutsmvp_sample.main.activity.view.recycler.NotesViewHolder;
+
+import javax.inject.Inject;
 
 public class MainActivity
         extends AppCompatActivity
     implements View.OnClickListener, MVP_Main.RequiredViewOps
 {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private EditText mTextNewNote;
     private ListNotes mListAdapter;
     private ProgressBar mProgress;
 
-    private MVP_Main.ProvidedPresenterOps mPresenter;
+    @Inject
+    public MVP_Main.ProvidedPresenterOps mPresenter;
 
     // Responsible to maintain the object's integrity
     // during configurations change
@@ -81,34 +88,46 @@ public class MainActivity
      * Setup Model View Presenter pattern.
      * Use a {@link StateMaintainer} to maintain the
      * Presenter and Model instances between configuration changes.
-     * Could be done differently,
-     * using a dependency injection for example.
      */
-    private void setupMVP() {
-        // Check if StateMaintainer has been created
-        if (mStateMaintainer.firstTimeIn()) {
-            // Create the Presenter
-            MainPresenter presenter = new MainPresenter(this);
-            // Create the Model
-            MainModel model = new MainModel(presenter);
-            // Set Presenter model
-            presenter.setModel(model);
-            // Add Presenter and Model to StateMaintainer
-            mStateMaintainer.put(presenter);
-            mStateMaintainer.put(model);
-
-            // Set the Presenter as a interface
-            // To limit the communication with it
-            mPresenter = presenter;
-
+    private void setupMVP(){
+        if ( mStateMaintainer.firstTimeIn() ) {
+            initialize();
+        } else {
+            reinitialize();
         }
-        // get the Presenter from StateMaintainer
-        else {
-            // Get the Presenter
-            mPresenter = mStateMaintainer.get(MainPresenter.class.getName());
-            // Updated the View in Presenter
-            mPresenter.setView(this);
-        }
+    }
+
+    /**
+     * Setup the {@link MainPresenter} injection and saves in <code>mStateMaintainer</code>
+     */
+    private void initialize(){
+        Log.d(TAG, "initialize");
+        setupComponent();
+        mStateMaintainer.put(MainPresenter.class.getSimpleName(), mPresenter);
+    }
+
+    /**
+     * Recover {@link MainPresenter} from <code>mStateMaintainer</code> or creates
+     * a new {@link MainPresenter} if the instance has been lost from <code>mStateMaintainer</code>
+     */
+    private void reinitialize() {
+        Log.d(TAG, "reinitialize");
+        mPresenter = mStateMaintainer.get(MainPresenter.class.getSimpleName());
+        mPresenter.setView(this);
+        if ( mPresenter == null )
+            setupComponent();
+    }
+
+    /**
+     * Setup the {@link com.tinmegali.tutsmvp_sample.di.component.MainActivityComponent}
+     * to instantiate and inject a {@link MainPresenter}
+     */
+    private void setupComponent(){
+        Log.d(TAG, "setupComponent");
+        SampleApp.get(this)
+                .getAppComponent()
+                .getMainComponent(new MainActivityModule(this))
+                .inject(this);
     }
 
 

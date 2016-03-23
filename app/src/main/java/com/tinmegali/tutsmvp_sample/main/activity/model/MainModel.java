@@ -6,6 +6,8 @@ import com.tinmegali.tutsmvp_sample.models.Note;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * Model layer on Model View Presenter Pattern
  *
