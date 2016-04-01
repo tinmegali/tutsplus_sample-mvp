@@ -9,7 +9,6 @@ import android.widget.Toast;
 import com.tinmegali.tutsmvp_sample.main.activity.view.recycler.NotesViewHolder;
 import com.tinmegali.tutsmvp_sample.models.Note;
 
-import java.util.ArrayList;
 
 /**
  * Holder interface that contains all interfaces
@@ -55,12 +54,14 @@ public interface MVP_Main {
      *      View to Presenter
      */
     interface ProvidedPresenterOps {
+        // FIXME for tests
+        boolean getIdle();
         void onDestroy(boolean isChangingConfiguration);
         void setView(RequiredViewOps view);
         NotesViewHolder createViewHolder(ViewGroup parent, int viewType);
         void bindViewHolder(NotesViewHolder holder, int position);
         int getNotesCount();
-        void clickNewNote(EditText editText);
+        boolean clickNewNote(String editText);
         void clickDeleteNote(Note note, int adapterPos, int layoutPos);
     }
 

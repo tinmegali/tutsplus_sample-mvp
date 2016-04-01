@@ -3,7 +3,6 @@ package com.tinmegali.tutsmvp_sample.main.activity.presenter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +38,12 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
     // and we don't want to create a memory leak
     private WeakReference<MVP_Main.RequiredViewOps> mView;
     // Model reference
-    private MVP_Main.ProvidedModelOps mModel;
+    public MVP_Main.ProvidedModelOps mModel;
+
+    // FIXME for tests
+    private boolean testIdle;
+    @Override
+    public boolean getIdle(){ return testIdle; }
 
     /**
      * Presenter Constructor
@@ -74,7 +78,7 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
      * @return  {@link com.tinmegali.tutsmvp_sample.main.activity.MVP_Main.RequiredViewOps}
      * @throws NullPointerException when View is unavailable
      */
-    private MVP_Main.RequiredViewOps getView() throws NullPointerException{
+    protected MVP_Main.RequiredViewOps getView() throws NullPointerException{
         if ( mView != null )
             return mView.get();
         else
@@ -147,6 +151,7 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
      */
     @Override
     public int getNotesCount() {
+        testIdle = false;
         return mModel.getNotesCount();
     }
 
@@ -216,49 +221,55 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
      * Called by View when user clicks on new Note btn.
      * Creates a Note with text typed by the user and asks
      * Model to insert in DB.
-     * @param editText  EdiText with text typed by user
      */
     @Override
-    public void clickNewNote(final EditText editText) {
+    public boolean clickNewNote(final String noteText) {
         getView().showProgress();
-        final String noteText = editText.getText().toString();
         if ( !noteText.isEmpty() ) {
-            new AsyncTask<Void, Void, Integer>() {
-                @Override
-                protected Integer doInBackground(Void... params) {
-                    // Insert note in Model, returning result
-                    return mModel.insertNote(makeNote(noteText));
-                }
-
-                @Override
-                protected void onPostExecute(Integer adapterPosition) {
-                    try {
-                        if (adapterPosition > -1) {
-                            // Insert note
-                            getView().clearEditText();
-                            getView().notifyItemInserted(adapterPosition + 1);
-                            getView().notifyItemRangeChanged(adapterPosition, mModel.getNotesCount());
-                        } else {
-                            // Inform about error
-                            getView().hideProgress();
-                            getView().showToast(makeToast("Error creating note [" + noteText + "]"));
-                        }
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }.execute();
+            startNoteCreation(noteText);
+            return true;
         } else {
             try {
-                getView().showToast(makeToast("Cannot add a blank note!"));
+                getView().showToast(makeToast(getActivityContext().getString(R.string.toast_empty_note)));
+                getView().hideProgress();
             } catch (NullPointerException e) {
                 e.printStackTrace();
             }
+            return false;
         }
     }
 
+    public void startNoteCreation(final String noteText){
+        new AsyncTask<Void, Void, Integer>() {
+            @Override
+            protected Integer doInBackground(Void... params) {
+                // Insert note in Model, returning result
+                return mModel.insertNote(makeNote(noteText));
+            }
+
+            @Override
+            protected void onPostExecute(Integer adapterPosition) {
+                getView().clearEditText();
+                getView().hideProgress();
+                try {
+                    if (adapterPosition > -1) {
+                        // Insert note
+                        getView().notifyItemInserted(adapterPosition + 1);
+                        getView().notifyItemRangeChanged(adapterPosition, mModel.getNotesCount());
+                    } else {
+                        // Inform about error
+                        String msg = String.format(getActivityContext().getString(R.string.toast_error), noteText);
+                        getView().showToast(makeToast(msg));
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
+    }
+
     /**
-     * Create a Note object with giver text
+     * Create a Note object with giverNew Note text
      * @param noteText  String with Note text
      * @return  A Note object
      */
@@ -298,21 +309,26 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
      */
     private void openDeleteAlert(final Note note, final int adapterPos, final int layoutPos){
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivityContext());
-        alertBuilder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+        alertBuilder.setPositiveButton(getActivityContext().getString(R.string.alert_del_btn_delete),
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // Delete note if action is confirmed
                 deleteNote(note, adapterPos, layoutPos);
             }
         });
-        alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+        alertBuilder.setNegativeButton(getActivityContext().getString(R.string.alert_del_btn_cancel),
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        alertBuilder.setTitle("Delete Note");
-        alertBuilder.setMessage("Delete " + note.getText() + " ?");
+        alertBuilder.setTitle(getActivityContext().getString(R.string.alert_del_title));
+        final String alertMsg = String.format(
+                getActivityContext().getString(R.string.alert_del_msg), note.getText()
+        );
+        alertBuilder.setMessage(alertMsg);
 
         AlertDialog alertDialog = alertBuilder.create();
         try {
@@ -344,10 +360,13 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
                     if ( result ) {
                         // Remove item from RecyclerView
                         getView().notifyItemRemoved(layoutPos);
-                        getView().showToast(makeToast("Note deleted."));
+                        getView().showToast(makeToast(getActivityContext().getString(R.string.toast_delete_success)));
                     } else {
                         // Inform about error
-                        getView().showToast(makeToast("Error deleting note["+note.getId()+"]"));
+                        final String errorMsg = String.format(
+                                getActivityContext().getString(R.string.toast_delete_error), note.getId()
+                        );
+                        getView().showToast(makeToast(errorMsg));
                     }
                 } catch (NullPointerException e) {
                     e.printStackTrace();

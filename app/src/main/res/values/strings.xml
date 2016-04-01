@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">tuts+mvp_sample</string>
     <string name="action_settings">Settings</string>
+
+    <string name="toast_empty_note">Cannot add a blank note!</string>
+    <string name="toast_error">Error creating note [ %s ]</string>
+    <string name="toast_delete_success">Note deleted.</string>
+    <string name="toast_delete_error">Error deleting note[%s]</string>
+
+    <string name="alert_del_title">Delete Note</string>
+    <string name="alert_del_msg">Delete %s ?</string>
+    <string name="alert_del_btn_cancel">CANCEL</string>
+    <string name="alert_del_btn_delete">DELETE</string>
+
 </resources>

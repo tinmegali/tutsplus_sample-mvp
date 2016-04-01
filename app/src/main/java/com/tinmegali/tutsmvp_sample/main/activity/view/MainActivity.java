@@ -2,7 +2,9 @@ package com.tinmegali.tutsmvp_sample.main.activity.view;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.FloatingActionButton;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -10,14 +12,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.tinmegali.tutsmvp_sample.R;
+import com.tinmegali.tutsmvp_sample.common.EspressoIdlingResource;
 import com.tinmegali.tutsmvp_sample.common.StateMaintainer;
 import com.tinmegali.tutsmvp_sample.main.activity.MVP_Main;
 import com.tinmegali.tutsmvp_sample.main.activity.model.MainModel;
@@ -29,15 +30,15 @@ public class MainActivity
     implements View.OnClickListener, MVP_Main.RequiredViewOps
 {
 
-    private EditText mTextNewNote;
-    private ListNotes mListAdapter;
-    private ProgressBar mProgress;
+    protected EditText mTextNewNote;
+    protected ListNotes mListAdapter;
+    protected ProgressBar mProgress;
 
-    private MVP_Main.ProvidedPresenterOps mPresenter;
+    public MVP_Main.ProvidedPresenterOps mPresenter;
 
     // Responsible to maintain the object's integrity
     // during configurations change
-    private final StateMaintainer mStateMaintainer =
+    protected final StateMaintainer mStateMaintainer =
             new StateMaintainer( getFragmentManager(), MainActivity.class.getName());
 
     @Override
@@ -58,7 +59,7 @@ public class MainActivity
     /**
      * Setup the Views
      */
-    private void setupViews(){
+    protected void setupViews(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -84,7 +85,7 @@ public class MainActivity
      * Could be done differently,
      * using a dependency injection for example.
      */
-    private void setupMVP() {
+    public void setupMVP() {
         // Check if StateMaintainer has been created
         if (mStateMaintainer.firstTimeIn()) {
             // Create the Presenter
@@ -117,7 +118,8 @@ public class MainActivity
         switch (v.getId()) {
             case R.id.fab:{
                 // Add new note
-                mPresenter.clickNewNote(mTextNewNote);
+                mPresenter.clickNewNote( mTextNewNote.getText().toString() );
+
             }
         }
     }
@@ -144,12 +146,12 @@ public class MainActivity
 
     @Override
     public void showProgress() {
-        mProgress.setVisibility(View.VISIBLE);;
+        mProgress.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideProgress() {
-        mProgress.setVisibility(View.GONE);;
+        mProgress.setVisibility(View.GONE);
     }
 
     @Override
@@ -177,7 +179,7 @@ public class MainActivity
         mListAdapter.notifyDataSetChanged();
     }
 
-    private class ListNotes extends RecyclerView.Adapter<NotesViewHolder> {
+    protected class ListNotes extends RecyclerView.Adapter<NotesViewHolder> {
 
 
         @Override
