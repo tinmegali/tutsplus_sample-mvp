@@ -7,7 +7,6 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.tinmegali.tutsmvp_sample.R;
@@ -141,7 +140,7 @@ public class MainPresenter implements MVP_Main.ProvidedPresenterOps, MVP_Main.Re
      * @param msg   Toast message
      * @return      A Toast object
      */
-    private Toast makeToast(String msg) {
+    public Toast makeToast(String msg) {
         return Toast.makeText(getView().getAppContext(), msg, Toast.LENGTH_SHORT);
     }
 

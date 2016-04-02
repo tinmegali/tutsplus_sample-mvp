@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * ---------------------------------------------------
  */
 @RunWith(RobolectricGradleTestRunner.class)
-//@Config(constants = BuildConfig.class, sdk = 21, manifest = "/src/main/AndroidManifest.xml")
+@Config(constants = BuildConfig.class, sdk = 21, manifest = "/src/main/AndroidManifest.xml")
 public class DBTest {
 
     private DAO dao;
