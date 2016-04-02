@@ -1,6 +1,7 @@
 package com.tinmegali.tutsmvp_sample;
 
 import android.content.Context;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.tinmegali.tutsmvp_sample.data.DAO;
 import com.tinmegali.tutsmvp_sample.models.Note;
@@ -25,15 +26,16 @@ import static org.junit.Assert.*;
  * <a href="http://www.github.com/tinmegali>github</a>
  * ---------------------------------------------------
  */
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = "/src/main/AndroidManifest.xml")
+@RunWith(AndroidJUnit4.class)
+//@Config(constants = BuildConfig.class, sdk = 21, manifest = "/src/main/AndroidManifest.xml")
 public class DBTest {
 
     private DAO dao;
 
     @Before
     public void setup() {
-        Context context = RuntimeEnvironment.application;
+        Context context =
+                RuntimeEnvironment.application;
         dao = new DAO(context);
     }
 
