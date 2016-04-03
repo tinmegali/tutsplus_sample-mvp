@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
  * ---------------------------------------------------
  */
 @RunWith(RobolectricGradleTestRunner.class)
+// To use Robolectric you need to setup some constants.
+// Change it according to your needs.
 @Config(constants = BuildConfig.class, sdk = 21, manifest = "/src/main/AndroidManifest.xml")
 public class DBTest {
 
@@ -49,10 +51,12 @@ public class DBTest {
         String noteText = "noteText";
         Note noteInserted = dao.insertNote(getNote(noteText));
         assertNotNull(noteInserted);
+        assertEquals(noteText, noteInserted.getText());
 
         Note note = dao.getNote(noteInserted.getId());
         assertNotNull(note);
         assertEquals(note.getText(), noteText);
+
     }
 
     @Test
